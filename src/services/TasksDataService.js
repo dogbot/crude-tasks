@@ -12,7 +12,7 @@ class TasksDataService {
     return http.post("/task", data);
   }
   update(id, data) {
-    return http.put(`/task/?id=${id}`, data);
+    return http.patch(`/task/${id}`, data);
   }
   delete(id) {
     return http.delete(`/task/${id}`);

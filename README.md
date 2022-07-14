@@ -2,23 +2,14 @@
 
 ## Project setup
 ```
-yarn install
+npm install
+```
+### 1st Run API Server
+```
+npm run API
 ```
 
-### Compiles and hot-reloads for development
+### 2nd Run Project
 ```
-yarn serve
+npm run serve
 ```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

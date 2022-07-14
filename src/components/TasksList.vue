@@ -1,55 +1,6 @@
 <template>
-<p>
-
-
-  <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-    Button with data-target
-  </button>
-</p>
-<div class="collapse" id="collapseExample">
-  <div class="card card-body">
-    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
-  </div>
-</div>
-  <div class="col-md-8">
-    <div class="input-group mb-3">
-      <input type="text" class="form-control" placeholder="Search by title" v-model="title" />
-      <div class="input-group-append">
-        <button class="btn btn-outline-secondary" type="button" @click="searchTitle">
-          Search
-        </button>
-      </div>
-    </div>
-  </div>
-  <div class="card rounded-6 shadow">
-    <h4 class="card-header">Tasks List</h4>
-
-      <div class="panel list-group">
-        <div :class="{ active: index == currentIndex }" v-for="(task, index) in tasks"
-          :key="index">
-          <button class="list-group-item" :data-target="'#task' + task.id" data-toggle="collapse">
-            {{ task.title }}
-          </button>
-          <div class="collapse" :id="'task' + task.id">
-            {{ task.description }}
-          </div>
-        </div>
-      </div>
-
-    <button class="m-3 btn btn-sm btn-danger" @click="removeAllTasks">
-      Remove All
-    </button>
-  </div>
-
-  <p>asd</p>
-  <p>asd</p>
-
-  <p>asd</p>
-  <p>asd</p>
-  <p>asd</p>
-  <p>asd</p>
   <div class="list row">
-    <div class="col-md-8">
+    <!-- <div class="col-md-8">
       <div class="input-group mb-3">
         <input type="text" class="form-control" placeholder="Search by title" v-model="title" />
         <div class="input-group-append">
@@ -58,40 +9,60 @@
           </button>
         </div>
       </div>
-    </div>
-    <!-- <div class="col-md-6 "> -->
+    </div> -->
 
-    <div class="card rounded-6 shadow">
-      <h4 class="card-header">Tasks List</h4>
-      <ul class="list-group">
-        <li class="list-group-item" :class="{ active: index == currentIndex }" v-for="(task, index) in tasks"
-          :key="index" @click="setActiveTask(task, index)">
-          {{ task.title }}
-        </li>
-      </ul>
-      <button class="m-3 btn btn-sm btn-danger" @click="removeAllTasks">
-        Remove All
-      </button>
-    </div>
-    <div class="col-md-6">
-      <div v-if="currentTask">
-        <h4>Task</h4>
-        <div>
-          <label><strong>Title:</strong></label> {{ currentTask.title }}
+    <p>{{ message }}</p>
+    <div class="accordion mb-5" id="accordionExample">
+
+      <div class="accordion-item" v-for="(task, index) in tasks" :key="index" >
+        <h2 class="accordion-header">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapse'+task.id" aria-expanded="true" aria-controls="collapseOne">
+            <span class="flex-grow-1"> {{ task.title }}</span>
+            <small style="flex-basis: auto; margin-right: 15px;"> {{ task.status ? "Published" : "Pending" }}</small>
+          </button>
+        </h2>
+        <div :id="'collapse'+task.id"  class="accordion-collapse collapse">
+          <div class="accordion-body">
+
+            <form @submit.prevent="updateTask">
+              <div class="form-group mb-2">
+                <label for="title">Title</label>
+                <input type="text" name="title" class="form-control" id="title"
+                       v-model="task.title"/>
+              </div>
+
+              <input type="hidden" name="id" v-model="task.id">
+              <div class="form-group mb-2">
+                <label for="description">Description</label>
+                <input type="text" name="description" class="form-control" id="description"
+                       v-model="task.description"
+                />
+              </div>
+              <div class="form-group mb-2">
+                <label><strong>Status:</strong></label>
+                {{ task.published ? "Published" : "Pending" }}
+              </div>
+
+              <div class="form-group mb-2">
+                <button type="submit" class="btn btn-success">Update</button>
+              </div>
+            </form>
         </div>
-        <div>
-          <label><strong>Description:</strong></label> {{ currentTask.description }}
-        </div>
-        <div>
-          <label><strong>Status:</strong></label> {{ currentTask.published ? "Published" : "Pending" }}
-        </div>
-        <router-link :to="'/tasks/' + currentTask.id" class="badge badge-warning">Edit</router-link>
       </div>
-      <div v-else>
-        <br />
-        <p>Please click on a Task...</p>
-      </div>
     </div>
+    </div>
+    <!--    <div class="card rounded-6 shadow">
+          <h4 class="card-header">Tasks List</h4>
+          <ul class="list-group">
+            <li class="list-group-item" :class="{ active: index == currentIndex }" v-for="(task, index) in tasks"
+              :key="index" @click="setActiveTask(task, index)">
+              {{ task.title }}
+            </li>
+          </ul>
+          <button class="m-3 btn btn-sm btn-danger" @click="removeAllTasks">
+            Remove All
+          </button>
+        </div>-->
   </div>
 </template>
 <script>
@@ -102,20 +73,44 @@ export default {
     return {
       tasks: [],
       currentTask: null,
+      message: null,
       currentIndex: -1,
-      title: ""
+      title: "",
+      task: {
+        id: null,
+        title: "",
+        description: "",
+        published: false
+      },
     };
   },
   methods: {
+
+    updateTask(submitEvent) {
+
+      this.task.title = submitEvent.target.elements.title.value;
+      this.task.description = submitEvent.target.elements.description.value;
+      this.task.id = submitEvent.target.elements.id.value;
+
+      TaskDataService.update(this.task.id, this.task)
+          .then(response => {
+            console.log(response.data);
+            this.message = 'The task was updated successfully!';
+          })
+          .catch(e => {
+            console.log(e);
+          });
+    },
+
     retrieveTasks() {
       TaskDataService.getAll()
-        .then(response => {
-          this.tasks = response.data;
-          console.log(response.data);
-        })
-        .catch(e => {
-          console.log(e);
-        });
+          .then(response => {
+            this.tasks = response.data;
+            console.log(response.data);
+          })
+          .catch(e => {
+            console.log(e);
+          });
     },
     refreshList() {
       this.retrieveTasks();
@@ -128,25 +123,25 @@ export default {
     },
     removeAllTasks() {
       TaskDataService.deleteAll()
-        .then(response => {
-          console.log(response.data);
-          this.refreshList();
-        })
-        .catch(e => {
-          console.log(e);
-        });
+          .then(response => {
+            console.log(response.data);
+            this.refreshList();
+          })
+          .catch(e => {
+            console.log(e);
+          });
     },
 
     searchTitle() {
       TaskDataService.findByTitle(this.title)
-        .then(response => {
-          this.tasks = response.data;
-          this.setActiveTask(null);
-          console.log(response.data);
-        })
-        .catch(e => {
-          console.log(e);
-        });
+          .then(response => {
+            this.tasks = response.data;
+            this.setActiveTask(null);
+            console.log(response.data);
+          })
+          .catch(e => {
+            console.log(e);
+          });
     }
   },
   mounted() {
